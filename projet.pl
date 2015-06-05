@@ -26,6 +26,42 @@ coupPossible(Plateau,Coup) :-
 		determinateJetonsObtenus(Marchandises, NewPositionT, JetonsObtenus),
 		verifJetons(Coup,JetonsObtenus).
 		
+jouer_coup(PlateauInitial, Coup, NouveauPlateau) :-
+		Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+		NouveauPlateau = [NMarchandises,NBourse,NPositionT,NReserveJ1,NReserveJ2,NJoueur],
+		changePlayer(Joueur,NJoueur),
+		changeReserve(Joueur,ReserveJ1,ReserveJ2,NReserveJ1,NReserveJ2, Coup),
+		changeValeur(Coup,Bourse,NBourse),
+		newPositionTrader(Coup,PositionT,NPositionT),
+		changeMarchandises(Marchandises,NPositionT,NMarchandises).
+
+changeMarchandises(Marchandises,NouvellePosition,NouvellesMarch) :-
+		posAvant(NouvellePosition,PosSuppr1),
+		posApres(NouvellePosition,PosSuppr2),
+		suppMarchandise(Marchandises,PosSuppr1,MarchTempo),
+		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarch).
+
+pop([T|Q],T,Q).
+		
+suppMarchandise([T|Q],1,[T1,Q]) :- pop(T,M,T1),!.
+
+suppMarchandise([T1|Q1],X,[T1|Q2]) :- X > 1, Y is X - 1, suppMarchandise(Q1,Y,Q2).
+		
+		
+changeValeur(_,[],[]).
+		
+changeValeur([_,_,_,Intitule],[[Intitule,T2]|Q],[[Intitule,T3]|Q]) :-
+		T3 is T2 - 1,!.
+
+changeValeur(Coup,[T1|Q1],[T1|Q2]) :-
+	changeValeur(Coup,Q1,Q2).
+		
+changeReserve('j1', RJ1,RJ2,NRJ1,RJ2,[_,_,Q,_]) :-
+		append(RJ1,Q,NRJ1).
+
+changeReserve('j2', RJ1,RJ2,RJ1,NRJ2,[_,_,Q,_]) :-
+		append(RJ2,Q,NRJ2).
+		
 checkJoueur(Plateau,[JoueurCoup|_]) :-
 		Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
 		Joueur = JoueurCoup, !.
@@ -33,9 +69,14 @@ checkJoueur(Plateau,[JoueurCoup|_]) :-
 checkDeplacement(Coup) :-
 		nth(2,Coup, N), integer(N), N > 0, N <4, !.
 		
-newPositionTrader([_,Dep|_], PosT, NewPosT) :-
-	NewPosT is PosT + Dep.
-
+newPositionTrader(Coup, PosT, NewPosT) :-
+	nth(2,Coup, N),
+	PosModulo is PosT mod 8,
+	NewPosT is PosModulo + N.
+	
+changePlayer('j1','j2').
+changePlayer('j2','j1').
+	
 posAvant(1,8) :- !.
 posAvant(Y,Z) :- Z = Y - 1.
 
