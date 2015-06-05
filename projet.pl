@@ -30,10 +30,8 @@ checkJoueur(Plateau,[JoueurCoup|_]) :-
 		Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
 		Joueur = JoueurCoup, !.
 		
-checkDeplacement([_,Dep,_,_]) :-
-		integer(Dep),
-		Dep > 0,
-		Dep < 4, !.
+checkDeplacement(Coup) :-
+		nth(2,Coup, N), integer(N), N > 0, N <4, !.
 		
 newPositionTrader([_,Dep|_], PosT, NewPosT) :-
 	NewPosT is PosT + Dep.
