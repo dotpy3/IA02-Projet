@@ -40,6 +40,11 @@ beginJoueurContreJoueur :-
 %% traite le coup
 %% puis renvoie le nouveau plateau vers playJoueurContreJoueur
 
+playJoueurContreJoueur(P) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	count (Marchandises, 0), !,
+	endGame(P).
+
 %%Création du plateau de jeu initial%%
 plateauDepart(Plateau) :-
 		Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
@@ -71,11 +76,21 @@ jouer_coup(PlateauInitial, Coup, NouveauPlateau) :-
 		newPositionTrader(Coup,PositionT,NPositionT),
 		changeMarchandises(Marchandises,NPositionT,NMarchandises).
 
+%% changeMarchandises traite les piles de marchandises
+%% puis supprime les piles vide
+
 changeMarchandises(Marchandises,NouvellePosition,NouvellesMarch) :-
 		posAvant(NouvellePosition,PosSuppr1),
 		posApres(NouvellePosition,PosSuppr2),
 		suppMarchandise(Marchandises,PosSuppr1,MarchTempo),
-		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarch).
+		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarchTemp),
+		suppPilesVides(NouvellesMarchTemp,NouvellesMarch).
+
+suppPilesVides([],[]).
+
+suppPilesVides([[]|Q],Q) :- !.
+
+suppPilesVides([T|Q1],[T|Q2]) :- suppPilesVides(Q1,Q2).
 		
 suppMarchandise([T|Q],1,[T1,Q]) :- pop(T,M,T1),!.
 
@@ -111,15 +126,16 @@ newPositionTrader(Coup, PosT, NewPosT) :-
 changePlayer('j1','j2').
 changePlayer('j2','j1').
 	
-posAvant(1,8) :- !.
+posAvant(1,NbPiles,NbPiles) :- !.
 posAvant(Y,Z) :- Z = Y - 1.
 
-posApres(8,1) :- !.
+posApres(NbPiles,1,NbPiles) :- !.
 posApres(Y,Z) :- Z = Y + 1.
 	
 determinateJetonsObtenus(Marchandises, PositionTrader, Jetons) :-
-		posAvant(PositionTrader,PosTrader1),
-		posApres(PositionTrader,PosTrader2),
+		count(Marchandises,NbPilesMarchandises),
+		posAvant(PositionTrader,PosTrader1,NbPilesMarchandises),
+		posApres(PositionTrader,PosTrader2,NbPilesMarchandises),
 		Jetons = [PosAvant,PosApres].
 		
 verifJetons([_,_,Jeton1,Jeton2],[JetonO1,JetonO2]) :-
