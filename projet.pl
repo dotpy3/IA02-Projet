@@ -4,6 +4,42 @@
 %  Eric Gourlaouen & Marie Kromwel %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+beginGame :-
+	introductionText(ListeChoix),
+	waitUserInput(R,ListeChoix),
+	beginSpecifiedGame(R).
+
+introductionText(ListeChoix) :-
+	write('/////////////////////////////'), nl,
+	write('CHICAGO STOCK EXCHANGE'), nl,
+	write('/////////////////////////////'), nl,
+	nl, nl,
+	ListeChoix = [1],
+	write('(1) : JOUER JOUEUR CONTRE JOUEUR').
+
+waitUserInput(R, ListeChoix) :-
+	repeat,
+	read(R),
+	element(R, ListeChoix).
+
+beginSpecifiedGame(1) :-
+	%% JOUEUR CONTRE JOUEUR
+	beginJoueurContreJoueur.
+
+beginJoueurContreJoueur :-
+	plateauDepart(P),
+	playJoueurContreJoueur(P).
+
+%% playJoueurContreJoueur :
+%% - vérifie que la partie n'est pas finie, sinon lance finPartie(P)
+%% - détermine quel joueur doit jouer
+%% lui affiche le plateau et lui demande de jouer
+%% demande le nombre de cases
+%% puis demande de sélectionner les marchandises gardées/jetées
+%% vérifie que le coup est possible
+%% traite le coup
+%% puis renvoie le nouveau plateau vers playJoueurContreJoueur
+
 %%Création du plateau de jeu initial%%
 plateauDepart(Plateau) :-
 		Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
@@ -40,8 +76,6 @@ changeMarchandises(Marchandises,NouvellePosition,NouvellesMarch) :-
 		posApres(NouvellePosition,PosSuppr2),
 		suppMarchandise(Marchandises,PosSuppr1,MarchTempo),
 		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarch).
-
-pop([T|Q],T,Q).
 		
 suppMarchandise([T|Q],1,[T1,Q]) :- pop(T,M,T1),!.
 
@@ -194,4 +228,10 @@ remplacer([_|Q],1,R,[R|Q]).
 remplacer([T|Q],X,R,[T|Q2]):-
 Y is X -1,
 remplacer(Q,Y,R,Q2).
+
+element(Q, []) :- fail.
+element(Q, [Q|_]).
+element(Q, [T|R]) :- element(Q,R).
+
+pop([T|Q],T,Q).
 
