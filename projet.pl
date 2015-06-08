@@ -14,13 +14,16 @@ introductionText(ListeChoix) :-
 	write('CHICAGO STOCK EXCHANGE'), nl,
 	write('/////////////////////////////'), nl,
 	nl, nl,
-	ListeChoix = [1],
-	write('(1) : JOUER JOUEUR CONTRE JOUEUR').
+	ListeChoix = [0,1],
+	write('(0) : ARRÊTER DE JOUER'), nl,
+	write('(1) : JOUER JOUEUR CONTRE JOUEUR'), nl.
 
 waitUserInput(R, ListeChoix) :-
 	repeat,
 	read(R),
 	element(R, ListeChoix).
+
+beginSpecifiedGame(0) :- write('Merci d\'avoir joué !').
 
 beginSpecifiedGame(1) :-
 	%% JOUEUR CONTRE JOUEUR
@@ -41,9 +44,54 @@ beginJoueurContreJoueur :-
 %% puis renvoie le nouveau plateau vers playJoueurContreJoueur
 
 playJoueurContreJoueur(P) :-
-	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
 	count (Marchandises, 0), !,
 	endGame(P).
+
+endGame(P) :-
+	countPoints(P, ReserveJ1,PointsJ1),
+	countPoints(P, ReserveJ2,PointsJ2),
+	determineWinner(PointsJ1,PointsJ2,Winner),
+	write('Félicitations au(x) gagnant(s) : '), write(Winner),nl,
+	write('//////////////////////'),beginGame.
+
+countPoints(P, [],0).
+countPoints(Plateau, [T|Q], P) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	countPoints(Plateau, Q,AnciensPoints),
+	pointsAccordingTo(Bourse, T, PointsAccordes),
+	P is AnciensPoints + PointsAccordes.
+
+determineWinner(S, J, 'Joueur 1') :- S > J.
+determineWinner(S, J, 'Joueur 2') :- S < J.
+determineWinner(S, J, 'les deux joueurs ex-aequo') :- S = J.
+
+pointsAccordingTo([[R,Points]|S],R, Points) :- !.
+
+pointsAccordingTo([R|Q],T, Pts) :- pointsAccordingTo (Q,T,Pts).
+
+playJoueurContreJoueur(Plateau) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	askCoup(Plateau,Coup), %% se charge de vérifier que le coup est possible
+	jouer_coup(Plateau,Coup,NPlateau),
+	playJoueurContreJoueur(NPlateau).
+
+askCoup(P,Coup) :-
+	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	Coup = [Joueur,NbCases,Garde,Jete],
+	repeat,
+	write('Combien de cases souhaitez-vous sauter ?'), nl,
+	read(NbCases),
+	newPositionTrader(Coup, P, NewPosT),
+	determinateJetonsObtenus(Marchandises, NewPosT, JetonsObtenus),
+	write('Quel jeton souhaitez-vous jeter ? L\'autre jeton sera jeté.'), nl,
+	read(JetonJete),
+	element(Jete, JetonsObtenus),
+	other(Jete, JetonsObtenus, Garde),
+	coupPossible(P,Coup).
+
+other(T, [T,Q], Q).
+other(T, [Q,T], Q).
 
 %%Création du plateau de jeu initial%%
 plateauDepart(Plateau) :-
