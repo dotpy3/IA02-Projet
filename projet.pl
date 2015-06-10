@@ -23,7 +23,7 @@ waitUserInput(R, ListeChoix) :-
 	read(R),
 	element(R, ListeChoix).
 
-beginSpecifiedGame(0) :- write('Merci d\'avoir joué !').
+beginSpecifiedGame(0) :- write('Merci d\'avoir joué !'), !.
 
 beginSpecifiedGame(1) :-
 	%% JOUEUR CONTRE JOUEUR
@@ -34,7 +34,7 @@ beginJoueurContreJoueur :-
 	playJoueurContreJoueur(P).
 
 %% playJoueurContreJoueur :
-%% - vérifie que la partie n'est pas finie, sinon lance finPartie(P)
+%% - vérifie que la partie n est pas finie, sinon lance finPartie(P)
 %% - détermine quel joueur doit jouer
 %% lui affiche le plateau et lui demande de jouer
 %% demande le nombre de cases
@@ -44,9 +44,15 @@ beginJoueurContreJoueur :-
 %% puis renvoie le nouveau plateau vers playJoueurContreJoueur
 
 playJoueurContreJoueur(P) :-
-	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
-	count (Marchandises, 0), !,
-	endGame(P).
+	P = [[],Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	endGame(P), !.
+
+playJoueurContreJoueur(Plateau) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	affichePlateau(Plateau),
+	askCoup(Plateau,Coup), %% se charge de vérifier que le coup est possible
+	jouer_coup(Plateau,Coup,NPlateau),
+	playJoueurContreJoueur(NPlateau).
 
 endGame(P) :-
 	countPoints(P, ReserveJ1,PointsJ1),
@@ -61,6 +67,12 @@ countPoints(Plateau, [T|Q], P) :-
 	countPoints(Plateau, Q,AnciensPoints),
 	pointsAccordingTo(Bourse, T, PointsAccordes),
 	P is AnciensPoints + PointsAccordes.
+	
+determinateJetonsObtenus(Marchandises, PositionTrader, Jetons) :-
+		compter(Marchandises,NbPilesMarchandises),
+		posAvant(PositionTrader,PosTrader1,NbPilesMarchandises),
+		posApres(PositionTrader,PosTrader2,NbPilesMarchandises),
+		Jetons = [PosAvant,PosApres].
 
 determineWinner(S, J, 'Joueur 1') :- S > J.
 determineWinner(S, J, 'Joueur 2') :- S < J.
@@ -68,13 +80,7 @@ determineWinner(S, J, 'les deux joueurs ex-aequo') :- S = J.
 
 pointsAccordingTo([[R,Points]|S],R, Points) :- !.
 
-pointsAccordingTo([R|Q],T, Pts) :- pointsAccordingTo (Q,T,Pts).
-
-playJoueurContreJoueur(Plateau) :-
-	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
-	askCoup(Plateau,Coup), %% se charge de vérifier que le coup est possible
-	jouer_coup(Plateau,Coup,NPlateau),
-	playJoueurContreJoueur(NPlateau).
+pointsAccordingTo([R|Q],T,Pts) :- pointsAccordingTo(Q,T,Pts).
 
 askCoup(P,Coup) :-
 	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
@@ -82,9 +88,9 @@ askCoup(P,Coup) :-
 	repeat,
 	write('Combien de cases souhaitez-vous sauter ?'), nl,
 	read(NbCases),
-	newPositionTrader(Coup, P, NewPosT),
+	newPositionTrader(Coup, PositionT, NewPosT),
 	determinateJetonsObtenus(Marchandises, NewPosT, JetonsObtenus),
-	write('Quel jeton souhaitez-vous jeter ? L\'autre jeton sera jeté.'), nl,
+	write('Quel jeton souhaitez-vous jeter ? L autre jeton sera jeté.'), nl,
 	read(JetonJete),
 	element(Jete, JetonsObtenus),
 	other(Jete, JetonsObtenus, Garde),
@@ -179,12 +185,6 @@ posAvant(Y,Z) :- Z = Y - 1.
 
 posApres(NbPiles,1,NbPiles) :- !.
 posApres(Y,Z) :- Z = Y + 1.
-	
-determinateJetonsObtenus(Marchandises, PositionTrader, Jetons) :-
-		count(Marchandises,NbPilesMarchandises),
-		posAvant(PositionTrader,PosTrader1,NbPilesMarchandises),
-		posApres(PositionTrader,PosTrader2,NbPilesMarchandises),
-		Jetons = [PosAvant,PosApres].
 		
 verifJetons([_,_,Jeton1,Jeton2],[JetonO1,JetonO2]) :-
 		Jeton1 = JetonO1,
@@ -299,3 +299,5 @@ element(Q, [T|R]) :- element(Q,R).
 
 pop([T|Q],T,Q).
 
+compter([],0) :- !.
+compter([_|Q],X) :- compter(Q,Y), X is Y + 1.
