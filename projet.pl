@@ -322,7 +322,45 @@ decrementationListe(Ancienne,Nouvelle,Nombre) :-
         nth(1, T, X),
         V is U-1,
         remplacer(Ancienne,Nombre, [X,V], Nouvelle).
+
 		
+%%%%%%%%%%%%%% INTELLIGENCE ARTIFICELLE %%%%%%%%%%
+
+%%%% FONCTIONS ERIC
+
+score(P,ReserveJ1,ReserveJ2,'j1',ScoreR) :-
+	countPoints(P, ReserveJ1,PointsJ1),
+	countPoints(P, ReserveJ2,PointsJ2),
+	ScoreR is PointsJ1 - PointsJ2.
+	
+score(P,ReserveJ1,ReserveJ2,'j2',Score) :-
+	countPoints(P, ReserveJ1,PointsJ1),
+	countPoints(P, ReserveJ2,PointsJ2),
+	Score is PointsJ2 - PointsJ1.
+
+minimax(Plateau, _, _, Retour, JoueurMinimax) :-
+	Plateau = [[P,Q],Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	!,
+	score(Plateau,ReserveJ1,ReserveJ2,JoueurMinimax,Retour).
+	
+minimax(Plateau, 0, _, Retour, JoueurMinimax) :- !,
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+	score(Plateau,ReserveJ1,ReserveJ2,JoueurMinimax,Retour).
+
+minimax(Plateau, X, 'true', Retour, JoueurMinimax) :-
+	coupsPossibles(Plateau,ListeCoups),
+	Y is X - 1,
+	getMaxListeCoups(ListeCoups,Y,Retour,JoueurMinimax).
+
+minimax(Plateau, X, 'false', Retour, JoueurMinimax) :-
+	coupsPossibles(Plateau,ListeCoups),
+	Y is X - 1,
+	getMinListeCoups(ListeCoups,Y,Retour,JoueurMinimax).
+
+getMaxListeCoups(ListeCoups,Y,Retour,Joueur) :-
+	transferValue(ListeCoups,ListeCoupsValuee,Joueur),
+	getMaxOfList(ListeCoupsValuee,[T|Retour]).
+	
 
 
         
