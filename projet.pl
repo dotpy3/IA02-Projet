@@ -145,12 +145,12 @@ changeMarchandises(Marchandises,NouvellePosition,NouvellesMarch) :-
 		posAvant(Marchandises,NouvellePosition,PosSuppr1),
 		posApres(Marchandises,NouvellePosition,PosSuppr2),
 		suppMarchandise(Marchandises,PosSuppr1,MarchTempo),
-		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarchTemp),trace,
-		suppPilesVides(NouvellesMarchTemp,NouvellesMarch),notrace.
+		suppMarchandise(MarchTempo,PosSuppr2,NouvellesMarchTemp),
+		suppPilesVides(NouvellesMarchTemp,NouvellesMarch).
 
-suppPilesVides([],[]).
+suppPilesVides([],[]):- !.
 
-suppPilesVides([[]|Q],Q) :- !.
+suppPilesVides([[]|Q1],Q2) :- suppPilesVides(Q1,Q2).
 
 suppPilesVides([T|Q1],[T|Q2]) :- suppPilesVides(Q1,Q2).
 		
