@@ -131,12 +131,19 @@ coupPossible(Plateau,Coup) :-
 		
 jouer_coup(PlateauInitial, Coup, NouveauPlateau) :-
 		PlateauInitial = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
-		NouveauPlateau = [NMarchandises,NBourse,NPositionT,NReserveJ1,NReserveJ2,NJoueur],
+		NouveauPlateau = [NMarchandises,NBourse,NPositionT2,NReserveJ1,NReserveJ2,NJoueur],
 		changePlayer(Joueur,NJoueur),
 		changeReserve(Joueur,ReserveJ1,ReserveJ2,NReserveJ1,NReserveJ2, Coup),
 		changeValeur(Coup,Bourse,NBourse),
 		newPositionTrader(Marchandises, Coup,PositionT,NPositionT),
-		changeMarchandises(Marchandises,NPositionT,NMarchandises).
+		changeMarchandises(Marchandises,NPositionT,NMarchandises),
+		checkPositionTrader(NMarchandises,NPositionT,NPositionT2).
+		
+checkPositionTrader(Marchandises,NPositionT,1) :-
+		length(Marchandises,LengthM),
+		LengthM < NPositionT, !.
+
+checkPositionTrader(Marchandises,NPositionT,NPositionT).
 
 %% changeMarchandises traite les piles de marchandises
 %% puis supprime les piles vide
@@ -226,15 +233,8 @@ affichePlateau(Plateau) :-
 		print('///////////////////'), nl,
 		write('/ ETAT DU PLATEAU /'), nl,
 		write('///////////////////'), nl,
-		printPile(1,Marchandises,PositionT),
-		printPile(2,Marchandises,PositionT),
-		printPile(3,Marchandises,PositionT),
-		printPile(4,Marchandises,PositionT),
-		printPile(5,Marchandises,PositionT),
-		printPile(6,Marchandises,PositionT),
-		printPile(7,Marchandises,PositionT),
-		printPile(8,Marchandises,PositionT),
-		printPile(9,Marchandises,PositionT),
+		length(Marchandises,NbMarchandises),
+		printAllPile(NbMarchandises,Marchandises,PositionT),
 		nl,
 		print('/////////////////////'), nl,
 		write('/ ETAT DE LA BOURSE /'), nl,
@@ -248,11 +248,18 @@ affichePlateau(Plateau) :-
 		nl,
 		print('C\'est à '), write(Joueur), print(' de jouer.'),
 		!.
+
+printAllPile(1,Marchandises,PositionT) :- !,
+		printPile(1,Marchandises,PositionT).
+
+printAllPile(X,Marchandises,PositionT) :- X > 0,
+		Y is X - 1,
+		printAllPile(Y,Marchandises,PositionT),
+		printPile(X,Marchandises,PositionT).
 		
 printPile(I,Marchandises,PositionT) :-
 		nth(I, Marchandises, Pile), !, write('Pile '),write(I),write(' : '), nth(1, Pile, ResultatPile), write(ResultatPile), writePositionTrader(PositionT,I), nl.
-		
-printPile(I,Marchandises).
+	
 		
 writePositionTrader(PositionTrader,PositionTrader) :-
 	write(' <= TRADER'), !.
