@@ -361,7 +361,47 @@ getMaxListeCoups(ListeCoups,Y,Retour,Joueur) :-
 	transferValue(ListeCoups,ListeCoupsValuee,Joueur),
 	getMaxOfList(ListeCoupsValuee,[T|Retour]).
 	
+%% FONCTIONS MARIE %%
 
+genereListPlateau(P,[],[]):-!.
+
+genereListPlateau(P,ListeCP,[P1|ListePP]):-
+ ListeCP = [T|Q],
+ jouer_coup(P,T,P1), 
+ genereListPlateau(P,Q,ListePP).
+
+coupsPossibles(P,CoupsP):-
+ P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+ %cherche tous les déplacements depuis la positions actuelle
+ findDeplacement(Marchandises,PositionT,ListeDep),
+ %creer des coups en fonction des positions trouvées et des jetons dispo
+ genereCoups(P,ListeDep,CoupsP).
+ 
+findDeplacement(Marchandises,PosA,Res):-
+ %retourne liste des deplacement possibles
+ Res = [P1,P2,P3],
+ length(Marchandises,NbMarchandises),
+ P1T is PosA + 1,
+ changeModulo(P1T,P1,NbMarchandises),
+ P2T is PosA + 2,
+ changeModulo(P2T,P2,NbMarchandises),
+ P3T is PosA + 3,
+ changeModulo(P3T,P3,NbMarchandises).
+
+genereCoups(P,[P1,P2,P3],[Coup1A,Coup1B,Coup2A,Coup2B,Coup3A,Coup3B]):-
+ P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+ determinateJetonsObtenus(Marchandises, P1, JetonsObtenus1),
+ JetonsObtenus1 = [Jete1,Garde1],
+ Coup1A=[ordi,1,Garde1,Jete1],
+ Coup1B=[ordi,1,Jete1,Garde1],
+ determinateJetonsObtenus(Marchandises, P2, JetonsObtenus2),
+ JetonsObtenus2 = [Jete2,Garde2],
+ Coup2A=[ordi,2,Garde2,Jete2],
+ Coup2B=[ordi,2,Jete2,Garde2],
+ determinateJetonsObtenus(Marchandises, P3, JetonsObtenus3),
+ JetonsObtenus3 = [Jete3,Garde3], 
+ Coup3A=[ordi,3,Garde3,Jete3],
+ Coup3B=[ordi,3,Jete3,Garde3].
 
         
 %%%% FONCTIONS DE SERVICE %%%%
