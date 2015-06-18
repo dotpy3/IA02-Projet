@@ -38,7 +38,7 @@ beginJoueurContreJoueur :-
 %% - détermine quel joueur doit jouer
 %% lui affiche le plateau et lui demande de jouer
 %% demande le nombre de cases
-%% puis demande de sélectionner les marchandises gardées/jetées
+%% puis demande de sélectionner les marchandises gardées ou jetées
 %% vérifie que le coup est possible
 %% traite le coup
 %% puis renvoie le nouveau plateau vers playJoueurContreJoueur
@@ -174,8 +174,14 @@ checkDeplacement(Coup) :-
 		
 newPositionTrader(Coup, PosT, NewPosT) :-
 	nth(2,Coup, N),
-	PosModulo is PosT mod 8,
-	NewPosT is PosModulo + N.
+	PosTemp is N + PosT,
+	changeModulo(PosTemp,NewPosT).
+	
+changeModulo(P,Q) :-
+	P > 8, !,
+	Q is P - 8.
+
+changeModulo(P,P).
 	
 changePlayer('j1','j2').
 changePlayer('j2','j1').
