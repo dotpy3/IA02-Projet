@@ -363,46 +363,181 @@ getMaxListeCoups(ListeCoups,Y,Retour,Joueur) :-
 	
 %% FONCTIONS MARIE %%
 
+
+max([X],X).
+max([X|L],X) :- max(L,M), X > M.
+max([X|L],M) :- max(L,M), X =< M.
+
+
+
+meilleur_coup(P,j1,C) :-
+
+	%Determiner coups possibles
+
+	coupsPossibles(P,ListeCoupsP),
+	ListeCoupsP=[C1,C2,C3,C4,C5,C6],
+	genereListPlateau(P,ListeCoupsP,PP),
+	PP=[P1,P2,P3,P4,P5,P6],
+	P1 = [_,_,_,ReserveJ11,_,_],
+	P2 = [_,_,_,ReserveJ12,_,_],
+	P3 = [_,_,_,ReserveJ13,_,_],
+	P4 = [_,_,_,ReserveJ14,_,_],
+	P5 = [_,_,_,ReserveJ15,_,_],
+	P6 = [_,_,_,ReserveJ16,_,_],
+	countPoints(P1, ReserveJ11,Score1),
+	countPoints(P2, ReserveJ12,Score2),
+	countPoints(P3, ReserveJ13,Score3),	
+
+	countPoints(P4, ReserveJ14,Score4),
+	countPoints(P5, ReserveJ15,Score5),
+	countPoints(P6, ReserveJ16,Score6),
+	Scores=[Score1,Score2,Score3,Score4,Score5,Score6],
+	max(Scores,M),
+	nth(X,Scores,M),
+	nth(X,ListeCoupsP,C).	 	
+
+meilleur_coup(P,j2,C) :-
+
+	%Determiner coups possibles
+
+	coupsPossibles(P,ListeCoupsP),
+	ListeCoupsP=[C1,C2,C3,C4,C5,C6],
+	genereListPlateau(P,ListeCoupsP,PP),
+	PP=[P1,P2,P3,P4,P5,P6],
+	P1 = [_,_,_,_,ReserveJ21,_],
+	P2 = [_,_,_,_,ReserveJ22,_],
+	P3 = [_,_,_,_,ReserveJ23,_],
+	P4 = [_,_,_,_,ReserveJ24,_],
+	P5 = [_,_,_,_,ReserveJ25,_],
+	P6 = [_,_,_,_,ReserveJ26,_],
+	countPoints(P1, ReserveJ21,Score1),
+	countPoints(P2, ReserveJ22,Score2),
+	countPoints(P3, ReserveJ23,Score3),	
+
+	countPoints(P4, ReserveJ24,Score4),
+	countPoints(P5, ReserveJ25,Score5),
+	countPoints(P6, ReserveJ26,Score6),
+	Scores=[Score1,Score2,Score3,Score4,Score5,Score6],
+	max(Scores,M),
+	nth(X,Scores,M),
+	nth(X,ListeCoupsP,C).	
+
+
+
 genereListPlateau(P,[],[]):-!.
 
+
+
 genereListPlateau(P,ListeCP,[P1|ListePP]):-
- ListeCP = [T|Q],
- jouer_coup(P,T,P1), 
- genereListPlateau(P,Q,ListePP).
+
+	ListeCP = [T|Q],
+
+	jouer_coup(P,T,P1), 
+
+	genereListPlateau(P,Q,ListePP).
+
+
 
 coupsPossibles(P,CoupsP):-
- P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
- %cherche tous les déplacements depuis la positions actuelle
- findDeplacement(Marchandises,PositionT,ListeDep),
- %creer des coups en fonction des positions trouvées et des jetons dispo
- genereCoups(P,ListeDep,CoupsP).
- 
+
+	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+
+	%cherche tous les déplacements depuis la positions actuelle
+
+	findDeplacement(Marchandises,PositionT,ListeDep),
+
+	%creer des coups en fonction des positions trouvées et des jetons dispo
+
+	genereCoups(P,ListeDep,CoupsP).
+
+	
+
 findDeplacement(Marchandises,PosA,Res):-
- %retourne liste des deplacement possibles
- Res = [P1,P2,P3],
- length(Marchandises,NbMarchandises),
- P1T is PosA + 1,
- changeModulo(P1T,P1,NbMarchandises),
- P2T is PosA + 2,
- changeModulo(P2T,P2,NbMarchandises),
- P3T is PosA + 3,
- changeModulo(P3T,P3,NbMarchandises).
+
+	%retourne liste des deplacement possibles
+
+	Res = [P1,P2,P3],
+
+	length(Marchandises,NbMarchandises),
+
+	P1T is PosA + 1,
+
+	changeModulo(P1T,P1,NbMarchandises),
+
+	P2T is PosA + 2,
+
+	changeModulo(P2T,P2,NbMarchandises),
+
+	P3T is PosA + 3,
+
+	changeModulo(P3T,P3,NbMarchandises).
+
+
 
 genereCoups(P,[P1,P2,P3],[Coup1A,Coup1B,Coup2A,Coup2B,Coup3A,Coup3B]):-
- P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
- determinateJetonsObtenus(Marchandises, P1, JetonsObtenus1),
- JetonsObtenus1 = [Jete1,Garde1],
- Coup1A=[ordi,1,Garde1,Jete1],
- Coup1B=[ordi,1,Jete1,Garde1],
- determinateJetonsObtenus(Marchandises, P2, JetonsObtenus2),
- JetonsObtenus2 = [Jete2,Garde2],
- Coup2A=[ordi,2,Garde2,Jete2],
- Coup2B=[ordi,2,Jete2,Garde2],
- determinateJetonsObtenus(Marchandises, P3, JetonsObtenus3),
- JetonsObtenus3 = [Jete3,Garde3], 
- Coup3A=[ordi,3,Garde3,Jete3],
- Coup3B=[ordi,3,Jete3,Garde3].
 
+	P = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+
+	determinateJetonsObtenus(Marchandises, P1, JetonsObtenus1),
+
+	JetonsObtenus1 = [Jete1,Garde1],
+
+	Coup1A=[Joueur,1,Garde1,Jete1],
+
+	Coup1B=[Joueur,1,Jete1,Garde1],
+
+	determinateJetonsObtenus(Marchandises, P2, JetonsObtenus2),
+
+	JetonsObtenus2 = [Jete2,Garde2],
+
+	Coup2A=[Joueur,2,Garde2,Jete2],
+
+	Coup2B=[Joueur,2,Jete2,Garde2],
+
+	determinateJetonsObtenus(Marchandises, P3, JetonsObtenus3),
+
+	JetonsObtenus3 = [Jete3,Garde3],	
+
+	Coup3A=[Joueur,3,Garde3,Jete3],
+
+	Coup3B=[Joueur,3,Jete3,Garde3].
+
+
+beginJoueurContreIA :-
+
+	plateauDepart(P),
+
+	playJoueurContreIA(P).
+
+
+
+playJoueurContreIA(P) :-
+
+	P = [[_,_],Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
+
+	endGame(P), !.
+
+
+
+playJoueurContreIA([Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,j1]) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,j1],
+
+	affichePlateau(Plateau),
+
+	askCoup(Plateau,Coup), %% se charge de vérifier que le coup est possible
+
+	jouer_coup(Plateau,Coup,NPlateau),
+
+	playJoueurContreIA(NPlateau).
+
+playJoueurContreIA([Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,j2]) :-
+	Plateau = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,j2],
+
+	meilleur_coup(Plateau,j2,Coup),
+
+	jouer_coup(Plateau,Coup,NPlateau),
+
+	playJoueurContreIA(NPlateau).
         
 %%%% FONCTIONS DE SERVICE %%%%
 
