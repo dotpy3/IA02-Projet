@@ -55,6 +55,7 @@ playJoueurContreJoueur(Plateau) :-
 	playJoueurContreJoueur(NPlateau).
 
 endGame(P) :-
+	P  = [Marchandises,Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
 	countPoints(P, ReserveJ1,PointsJ1),
 	countPoints(P, ReserveJ2,PointsJ2),
 	determineWinner(PointsJ1,PointsJ2,Winner),
@@ -350,16 +351,52 @@ minimax(Plateau, 0, _, Retour, JoueurMinimax) :- !,
 minimax(Plateau, X, 'true', Retour, JoueurMinimax) :-
 	coupsPossibles(Plateau,ListeCoups),
 	Y is X - 1,
-	getMaxListeCoups(ListeCoups,Y,Retour,JoueurMinimax).
+	getMaxListeCoups(Plateau, ListeCoups,Y,Retour,JoueurMinimax,'true').
 
 minimax(Plateau, X, 'false', Retour, JoueurMinimax) :-
 	coupsPossibles(Plateau,ListeCoups),
 	Y is X - 1,
-	getMinListeCoups(ListeCoups,Y,Retour,JoueurMinimax).
+	getMinListeCoups(Plateau, ListeCoups,Y,Retour,JoueurMinimax,'false').
 
-getMaxListeCoups(ListeCoups,Y,Retour,Joueur) :-
-	transferValue(ListeCoups,ListeCoupsValuee,Joueur),
-	getMaxOfList(ListeCoupsValuee,[T|Retour]).
+getMaxListeCoups(Plateau, ListeCoups,Y,Retour,Joueur,maximizingPlayer) :-
+	transferValue(ListeCoups,Y,ListeCoupsValuee,Joueur,Plateau),
+	getMaxOfList(ListeCoupsValuee,Retour).
+
+getMinListeCoups(Plateau, ListeCoups,Y,Retour,Joueur,maximizingPlayer) :-
+	transferValue(ListeCoups,Y,ListeCoupsValuee,Joueur,Plateau),
+	getMinOfList(ListeCoupsValuee,Retour).
+
+changeMaximizing('true','false').
+changeMaximizing('false','true').
+
+transferValue([Q|[]],Y,[Q,ScoreDonne],Joueur,maximizingPlayer,Plateau) :- !,
+	changeMaximizing(maximizingPlayer,newMaximizing),
+	jouer_coup(Plateau,Q,NouveauPlateau),
+	minimax(NouveauPlateau,Y,ScoreDonne,newMaximizing).
+
+transferValue([Q|T],Y,[[Q,ScoreDonne]|AutresCoupsValues],Joueur,maximizingPlayer,Plateau) :- 
+	transferValue(T,Y,AutresCoupsValues,Joueur,maximizingPlayer,Plateau),
+	changeMaximizing(maximizingPlayer,newMaximizing),
+	jouer_coup(Plateau,Q,NouveauPlateau),
+	minimax(NouveauPlateau,Y,ScoreDonne,newMaximizing).
+	
+getMaxOfList([Q|[]],Q) :- !. %% FONCTIONNE
+
+getMaxOfList([[Intitule,Valeur]|Q], [Intitule,Valeur]) :- %% FONCTIONNE
+	getMaxOfList(Q,[IntitulePrecedent,ValeurPrecedente]),
+	Valeur > ValeurPrecedente, !.
+
+getMinOfList([_|Q], ValeurPrecedente) :- %% FONCTIONNE
+	getMinOfList(Q,ValeurPrecedente).
+	
+getMinOfList([Q|[]],Q) :- !. %% FONCTIONNE
+
+getMinOfList([[Intitule,Valeur]|Q], [Intitule,Valeur]) :- %% FONCTIONNE
+	getMinOfList(Q,[IntitulePrecedent,ValeurPrecedente]),
+	Valeur < ValeurPrecedente, !.
+
+getMinOfList([_|Q], ValeurPrecedente) :- %% FONCTIONNE
+	getMinOfList(Q,ValeurPrecedente).
 	
 %% FONCTIONS MARIE %%
 
