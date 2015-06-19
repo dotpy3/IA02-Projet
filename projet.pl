@@ -510,6 +510,8 @@ pop([T|Q],T,Q).
 
 	
 %%%%%%%%%%%%%%%% Implementation Minimax %%%%%%%%%%%%%%%%
+
+%% minimax : retourne le meilleur coup
 minimax(Plateau, _, _, Retour, JoueurMinimax) :-
 	Plateau = [[P,Q],Bourse,PositionT,ReserveJ1,ReserveJ2,Joueur],
 	!,
@@ -529,6 +531,7 @@ minimax(Plateau, X, 'false', Retour, JoueurMinimax) :-
 	Y is X - 1,
 	getMinListeCoups(Plateau, ListeCoups,Y,Retour,JoueurMinimax,'false').
 
+%% donne les coups qui donne les meilleurs et moins bons score
 getMaxListeCoups(Plateau, ListeCoups,Y,Retour,Joueur,maximizingPlayer) :-
 	transferValue(ListeCoups,Y,ListeCoupsValuee,Joueur,Plateau),
 	getMaxOfList(ListeCoupsValuee,Retour).
@@ -537,9 +540,11 @@ getMinListeCoups(Plateau, ListeCoups,Y,Retour,Joueur,maximizingPlayer) :-
 	transferValue(ListeCoups,Y,ListeCoupsValuee,Joueur,Plateau),
 	getMinOfList(ListeCoupsValuee,Retour).
 
+%% change l'opérateur de sélection de score
 changeMaximizing('true','false').
 changeMaximizing('false','true').
 
+%% récupère la liste des coups possibles et leur attribue une valeur
 transferValue([Q|[]],Y,[Q,ScoreDonne],Joueur,maximizingPlayer,Plateau) :- !,
 	changeMaximizing(maximizingPlayer,newMaximizing),
 	jouer_coup(Plateau,Q,NouveauPlateau),
